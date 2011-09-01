@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# g15lcd init script, by Chris Olstrom (updated 2006-07-20)
+
+N=/etc/init.d/g15lcd
+
+set -e
+
+case "$1" in
+	start)
+		echo "Starting g15lcd..." >&2
+		if [ -p /var/run/g15lcd ]; then
+			echo "g15lcd already started." >&2
+			exit 1
+		fi
+		mknod /var/run/g15lcd p
+		chgrp g15lcd /var/run/g15lcd
+		chmod g+w /var/run/g15lcd
+		/usr/bin/g15lcd /var/run/g15lcd > /dev/null &
+		echo "g15lcd started." >&2
+	;;
+	restart)
+		$N stop
+		$N start
+	;;
+	stop)
+		echo "Stopping g15lcd..." >&2
+		if [ -p /var/run/g15lcd ]; then
+			rm -f /var/run/g15lcd
+			killall /usr/bin/g15lcd
+		else
+			echo "g15lcd not started." >&2
+			exit 1
+		fi
+		echo "g15lcd stopped." >&2
+	;;
+	reload|force-reload)
+	;;
+	*)
+		echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+		exit 1
+	;;
+esac
+
+exit 0
